@@ -1,0 +1,672 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>Portfolio Back-office</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=Public+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="assets/site.css">
+<style>
+/* Back-office: sticky top bar with tabs + status, single working column. Reuses site tokens. */
+:root{ --ok:#1F7A4D; --warn:#A86A00; --bad:#B3261E; }
+@media (prefers-color-scheme: dark){ :root{ --ok:#5BD192; --warn:#F2B84B; --bad:#FF8A80; } }
+body{font-size:15px}
+.bar-top{position:sticky; top:0; z-index:30; background:var(--surface); border-bottom:1px solid var(--line)}
+.bar-top .wrap{display:flex; flex-wrap:wrap; align-items:center; gap:10px 20px; padding-block:12px}
+.brand{font:800 17px/1 var(--display)}
+.brand small{font:500 11px/1 var(--mono); color:var(--muted); letter-spacing:.08em; text-transform:uppercase; margin-left:8px}
+.tabs{display:flex; gap:4px; flex-wrap:wrap; flex:1}
+.tab{font:600 14px/1 var(--body); padding:9px 13px; border-radius:8px; border:0; background:transparent; color:var(--muted); cursor:pointer}
+.tab[aria-selected="true"]{background:var(--teal-soft); color:var(--teal)}
+.status{display:flex; align-items:center; gap:10px; flex-wrap:wrap}
+.pill{font:500 12px/1 var(--mono); padding:6px 9px; border-radius:999px; border:1px solid var(--line); color:var(--muted); white-space:nowrap}
+.pill.dirty{border-color:var(--gold-bar); color:var(--gold)}
+.pill.ok{border-color:var(--ok); color:var(--ok)}
+.btn.sm{padding:9px 13px; font-size:13.5px}
+main.wrap{padding-block:28px 80px}
+.panel{display:grid; gap:20px}
+.card{padding-block:22px; background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:22px; min-width:0}
+.card > h2{font-size:21px; margin-bottom:4px}
+.card > .hint{color:var(--muted); margin:0 0 16px; max-width:70ch}
+.grid2{display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px 18px}
+.field{display:grid; gap:6px; min-width:0}
+.field.full{grid-column:1 / -1}
+.field > span{font:500 12px/1.2 var(--mono); letter-spacing:.06em; text-transform:uppercase; color:var(--muted)}
+.field small{color:var(--muted); font-size:12.5px}
+input[type=text], input[type=number], input[type=url], input[type=email], input[type=password], input[type=date], textarea, select{
+  font:400 15px/1.45 var(--body); color:var(--fg); background:var(--bg); border:1px solid var(--line); border-radius:8px; padding:9px 11px; width:100%; min-width:0}
+textarea{min-height:76px; resize:vertical}
+input:focus, textarea:focus, select:focus{outline:2px solid var(--teal); outline-offset:0; border-color:transparent}
+.check{display:flex; gap:8px; align-items:center; font-weight:500}
+details.item{border:1px solid var(--line); border-radius:10px; background:var(--bg)}
+details.item + details.item{margin-top:10px}
+details.item > summary{cursor:pointer; list-style:none; display:flex; align-items:center; gap:10px; padding:12px 14px; font-weight:600}
+details.item > summary::-webkit-details-marker{display:none}
+details.item > summary::before{content:"▸"; color:var(--muted); transition:transform .15s}
+details.item[open] > summary::before{transform:rotate(90deg)}
+summary .s-title{flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.item-body{padding:4px 14px 16px; display:grid; gap:14px}
+.mini{font:500 12.5px/1 var(--body); padding:6px 9px; border-radius:6px; border:1px solid var(--line); background:var(--surface); color:var(--fg); cursor:pointer}
+.mini:hover{border-color:var(--teal)}
+.mini.danger{color:var(--bad)}
+.mini:disabled{opacity:.4; cursor:default}
+.list-actions{display:flex; gap:8px; margin-top:12px; flex-wrap:wrap}
+.sub{border-left:2px solid var(--line); padding-left:14px; display:grid; gap:10px}
+.sub-title{font:500 12px/1 var(--mono); letter-spacing:.06em; text-transform:uppercase; color:var(--muted)}
+.row-inline{display:flex; gap:8px; flex-wrap:wrap; align-items:center}
+.msg{font-size:14px; padding:10px 12px; border-radius:8px; background:var(--teal-soft); color:var(--fg)}
+.msg.bad{background:color-mix(in srgb, var(--bad) 14%, transparent)}
+.msg.warn{background:color-mix(in srgb, var(--gold-bar) 18%, transparent)}
+table{width:100%; border-collapse:collapse; font-size:14px}
+th{text-align:left; font:500 11.5px/1.2 var(--mono); letter-spacing:.06em; text-transform:uppercase; color:var(--muted); padding:8px 10px; border-bottom:1px solid var(--line); white-space:nowrap}
+td{padding:10px; border-bottom:1px solid var(--line); vertical-align:top}
+td.num, th.num{text-align:right; font-variant-numeric:tabular-nums}
+.tbl{overflow-x:auto}
+.code{font:400 12.5px/1.4 var(--mono); word-break:break-all}
+.kpis{display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:14px}
+.kpi{background:var(--bg); border:1px solid var(--line); border-radius:10px; padding:14px 16px}
+.kpi b{display:block; font:700 30px/1.1 var(--display); font-variant-numeric:tabular-nums; margin-top:8px}
+.kpi small{color:var(--muted)}
+.example{font:500 11.5px/1 var(--mono); color:var(--gold); border:1px dashed var(--gold); border-radius:4px; padding:3px 6px; letter-spacing:.04em}
+.chart{width:100%; height:auto; display:block}
+.chart text{fill:var(--muted); font:500 10px var(--mono)}
+.chart .grid{stroke:var(--line)}
+.chart .b{fill:var(--teal)}
+.chart .b.last{fill:var(--gold-bar)}
+.funnel{display:grid; gap:10px}
+.fstep{display:grid; grid-template-columns:minmax(0,180px) minmax(0,1fr) 64px; gap:12px; align-items:center}
+.fstep .track{height:14px; background:var(--teal-soft); border-radius:3px; position:relative}
+.fstep .fill{background:var(--teal)}
+.two{display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:20px}
+@media (max-width:820px){ .grid2, .two{grid-template-columns:1fr} .kpis{grid-template-columns:repeat(2,minmax(0,1fr))} .fstep{grid-template-columns:110px minmax(0,1fr) 48px} }
+</style>
+</head>
+<body>
+<div class="bar-top">
+  <div class="wrap">
+    <div class="brand">Back-office<small>Portfolio</small></div>
+    <div class="tabs" role="tablist">
+      <button class="tab" role="tab" id="t-content" data-tab="content" aria-selected="true">Content</button>
+      <button class="tab" role="tab" id="t-links" data-tab="links" aria-selected="false">Tracked links</button>
+      <button class="tab" role="tab" id="t-analytics" data-tab="analytics" aria-selected="false">Analytics</button>
+      <button class="tab" role="tab" id="t-publish" data-tab="publish" aria-selected="false">Publish &amp; settings</button>
+    </div>
+    <div class="status">
+      <span class="pill" id="draft-pill">Loading…</span>
+      <a class="btn ghost sm" href="index.html?preview=1" target="_blank" rel="noopener" id="preview-btn">Preview</a>
+      <button class="btn sm" type="button" id="publish-btn">Publish</button>
+    </div>
+  </div>
+</div>
+
+<main class="wrap">
+  <div class="panel" id="p-content"></div>
+  <div class="panel" id="p-links" hidden></div>
+  <div class="panel" id="p-analytics" hidden></div>
+  <div class="panel" id="p-publish" hidden></div>
+</main>
+
+<script>
+(function () {
+  "use strict";
+  // ================= storage helpers =================
+  function lsGet(k, d) { try { var v = localStorage.getItem(k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } }
+  function lsSet(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); return true; } catch (e) { return false; } }
+  function esc(s) { return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
+  function $(id) { return document.getElementById(id); }
+  function h(tag, attrs, kids) {
+    var el = document.createElement(tag);
+    for (var k in (attrs || {})) {
+      var v = attrs[k];
+      if (k === "text") el.textContent = v;
+      else if (k === "html") el.innerHTML = v;
+      else if (k.slice(0, 2) === "on") el.addEventListener(k.slice(2), v);
+      else if (v === true) el.setAttribute(k, "");
+      else if (v !== false && v != null) el.setAttribute(k, v);
+    }
+    (kids || []).forEach(function (c) { if (c != null) el.appendChild(typeof c === "string" ? document.createTextNode(c) : c); });
+    return el;
+  }
+  function b64encode(str) { var bytes = new TextEncoder().encode(str), bin = ""; bytes.forEach(function (b) { bin += String.fromCharCode(b); }); return btoa(bin); }
+  function b64decode(b64) { var bin = atob(b64.replace(/\n/g, "")), bytes = new Uint8Array(bin.length); for (var i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i); return new TextDecoder().decode(bytes); }
+  function clone(o) { return JSON.parse(JSON.stringify(o)); }
+
+  // ================= state =================
+  var state = null;            // working draft
+  var published = null;        // last known live content (string)
+  var gh = lsGet("portfolio-github", { owner: "", repo: "", branch: "main", token: "" });
+
+  function setDirty() {
+    var dirty = published !== JSON.stringify(state);
+    var p = $("draft-pill");
+    p.textContent = dirty ? "Unpublished changes" : "Up to date";
+    p.className = "pill " + (dirty ? "dirty" : "ok");
+  }
+  var saveT;
+  function changed() {
+    clearTimeout(saveT);
+    saveT = setTimeout(function () { lsSet("portfolio-draft", state); setDirty(); }, 250);
+    setDirty();
+  }
+
+  // ================= schema =================
+  var CAT = [["seller", "Sellers"], ["customer", "Customers"], ["ops", "Operations"]];
+  var SCHEMA = [
+    { title: "Profile & hero", hint: "The top of the page. In the headline, wrap the old value in ~~tildes~~ and the new value in **stars** to style them.", path: "profile", fields: [
+      { k: "name", label: "Short name" }, { k: "fullName", label: "Full name" },
+      { k: "eyebrow", label: "Title line", full: true },
+      { k: "headline", label: "Headline", full: true, help: "Example: I take order response time from ~~45s~~ to **2s**." },
+      { k: "lede", label: "Intro paragraph", type: "textarea", full: true },
+      { k: "email", label: "Email", type: "email" }, { k: "linkedin", label: "LinkedIn URL", type: "url" },
+      { k: "location", label: "Location" }, { k: "contactHeadline", label: "Contact headline" },
+      { k: "facts", label: "Quick facts", type: "list", itemTitle: "label", fields: [{ k: "label", label: "Label" }, { k: "value", label: "Value" }], blank: { label: "", value: "" } }
+    ] },
+    { title: "Impact ledger", hint: "Before/after metrics. Bars use the numbers; the labels are what visitors read.", path: "ledger", fields: [
+      { k: "intro", label: "Intro line", full: true }, { k: "note", label: "Footnote", full: true },
+      { k: "rows", label: "Metrics", type: "list", itemTitle: "title", fields: [
+        { k: "title", label: "Metric" }, { k: "context", label: "Context" },
+        { k: "before", label: "Before (number)", type: "number" }, { k: "after", label: "After (number)", type: "number" },
+        { k: "beforeLabel", label: "Before label" }, { k: "afterLabel", label: "After label" },
+        { k: "delta", label: "Headline change" }, { k: "sub", label: "Under the change" }
+      ], blank: { title: "New metric", context: "", before: 100, after: 50, beforeLabel: "100", afterLabel: "50", delta: "−50%", sub: "" } }
+    ] },
+    { title: "Case studies", hint: "Shown in this order. The gold note is only visible in Preview, so use it as your to-do.", path: null, fields: [
+      { k: "cases", label: "Case studies", type: "list", itemTitle: "title", fields: [
+        { k: "title", label: "Title", full: true },
+        { k: "category", label: "Filter group", type: "select", options: CAT },
+        { k: "id", label: "Short id (for analytics)", help: "Lowercase letters and dashes. Changing it starts a new count." },
+        { k: "tag", label: "Tag" }, { k: "period", label: "Period" },
+        { k: "wide", label: "Full width", type: "check" },
+        { k: "result", label: "Result (highlighted)", type: "textarea", full: true },
+        { k: "sections", label: "Story blocks", type: "list", itemTitle: "label", fields: [{ k: "label", label: "Label" }, { k: "text", label: "Text", type: "textarea", full: true }], blank: { label: "Label", text: "" } },
+        { k: "images", label: "Screenshots", type: "list", itemTitle: "caption", image: true, fields: [{ k: "src", label: "Image path or URL", full: true }, { k: "alt", label: "Alt text (describe the image)", full: true }, { k: "caption", label: "Caption", full: true }], blank: { src: "", alt: "", caption: "" } },
+        { k: "todo", label: "Private note (preview only)", full: true }
+      ], blank: { id: "new-case", category: "customer", wide: false, tag: "", period: "", title: "New case study", result: "", sections: [{ label: "Problem", text: "" }, { label: "What I did", text: "" }, { label: "Result", text: "" }], images: [], todo: "" } }
+    ] },
+    { title: "How I work", path: null, fields: [
+      { k: "principles", label: "Principles", type: "list", itemTitle: "title", fields: [{ k: "title", label: "Title" }, { k: "text", label: "Text", type: "textarea", full: true }], blank: { title: "New principle", text: "" } }
+    ] },
+    { title: "Experience", path: null, fields: [
+      { k: "experienceIntro", label: "Intro line", full: true },
+      { k: "jobs", label: "Roles (newest first)", type: "list", itemTitle: "role", fields: [
+        { k: "role", label: "Role" }, { k: "company", label: "Company" }, { k: "when", label: "Dates" },
+        { k: "current", label: "Current role", type: "check" }, { k: "text", label: "Summary", type: "textarea", full: true }
+      ], blank: { when: "", role: "New role", company: "", current: false, text: "" } }
+    ] },
+    { title: "Credentials", path: null, fields: [
+      { k: "certifications", label: "Certifications", type: "list", itemTitle: "name", fields: [{ k: "name", label: "Name" }, { k: "year", label: "Year" }], blank: { name: "", year: "" } },
+      { k: "education", label: "Education", type: "list", itemTitle: "name", fields: [{ k: "name", label: "Name" }, { k: "year", label: "Year" }], blank: { name: "", year: "" } },
+      { k: "leadership", label: "Leadership", type: "list", itemTitle: "name", fields: [{ k: "name", label: "Name" }, { k: "year", label: "Year" }], blank: { name: "", year: "" } }
+    ] }
+  ];
+
+  var uid = 0;
+  function fieldEl(def, obj, onStructure) {
+    var id = "f" + (++uid);
+    if (def.type === "list") return listEl(def, obj, onStructure);
+    if (def.type === "check") {
+      var cb = h("input", { type: "checkbox", id: id });
+      cb.checked = !!obj[def.k];
+      cb.addEventListener("change", function () { obj[def.k] = cb.checked; changed(); });
+      return h("label", { class: "check field" + (def.full ? " full" : ""), for: id }, [cb, def.label]);
+    }
+    var input;
+    if (def.type === "textarea") input = h("textarea", { id: id });
+    else if (def.type === "select") {
+      input = h("select", { id: id }, def.options.map(function (o) { return h("option", { value: o[0], text: o[1] }); }));
+    } else input = h("input", { type: def.type || "text", id: id, step: def.type === "number" ? "any" : null });
+    input.value = obj[def.k] == null ? "" : obj[def.k];
+    input.addEventListener("input", function () {
+      obj[def.k] = def.type === "number" ? (input.value === "" ? 0 : +input.value) : input.value;
+      changed();
+      if (def.onTitle) def.onTitle(input.value);
+    });
+    return h("label", { class: "field" + (def.full || def.type === "textarea" ? " full" : ""), for: id }, [
+      h("span", { text: def.label }), input, def.help ? h("small", { text: def.help }) : null
+    ]);
+  }
+
+  function listEl(def, obj, onStructure) {
+    if (!Array.isArray(obj[def.k])) obj[def.k] = [];
+    var arr = obj[def.k];
+    var wrap = h("div", { class: "field full" }, [h("span", { text: def.label })]);
+    var box = h("div");
+    function redraw() { box.innerHTML = ""; arr.forEach(function (item, i) { box.appendChild(itemEl(item, i)); }); }
+    function itemEl(item, i) {
+      var titleSpan = h("span", { class: "s-title", text: item[def.itemTitle] || "(untitled)" });
+      var up = h("button", { class: "mini", type: "button", title: "Move up", "aria-label": "Move up", onclick: function (e) { e.preventDefault(); if (i > 0) { arr.splice(i - 1, 0, arr.splice(i, 1)[0]); changed(); redraw(); } } }, ["↑"]);
+      var dn = h("button", { class: "mini", type: "button", title: "Move down", "aria-label": "Move down", onclick: function (e) { e.preventDefault(); if (i < arr.length - 1) { arr.splice(i + 1, 0, arr.splice(i, 1)[0]); changed(); redraw(); } } }, ["↓"]);
+      up.disabled = i === 0; dn.disabled = i === arr.length - 1;
+      var del = h("button", { class: "mini danger", type: "button", onclick: function (e) {
+        e.preventDefault();
+        if (del.dataset.armed) { arr.splice(i, 1); changed(); redraw(); }
+        else { del.dataset.armed = "1"; del.textContent = "Click again to delete"; setTimeout(function () { if (del.isConnected) { delete del.dataset.armed; del.textContent = "Delete"; } }, 3000); }
+      } }, ["Delete"]);
+      var body = h("div", { class: "item-body" });
+      var g = h("div", { class: "grid2" });
+      def.fields.forEach(function (f) {
+        var f2 = Object.assign({}, f);
+        if (f.k === def.itemTitle) f2.onTitle = function (v) { titleSpan.textContent = v || "(untitled)"; };
+        var el = fieldEl(f2, item);
+        if (f.type === "list") { body.appendChild(g); g = h("div", { class: "grid2" }); el.classList.add("sub"); body.appendChild(el); }
+        else g.appendChild(el);
+      });
+      body.appendChild(g);
+      if (def.image) body.appendChild(uploadEl(item, body));
+      return h("details", { class: "item" }, [h("summary", {}, [titleSpan, up, dn, del]), body]);
+    }
+    redraw();
+    var add = h("button", { class: "mini", type: "button", onclick: function () { arr.push(clone(def.blank)); changed(); redraw(); var last = box.lastChild; if (last) last.open = true; } }, ["+ Add " + def.label.toLowerCase().replace(/s$/, "").replace(/ \(.*\)$/, "")]);
+    wrap.appendChild(box);
+    wrap.appendChild(h("div", { class: "list-actions" }, [add]));
+    return wrap;
+  }
+
+  function uploadEl(item, body) {
+    var id = "up" + (++uid);
+    var out = h("small", { "aria-live": "polite" });
+    var input = h("input", { type: "file", id: id, accept: "image/png,image/jpeg,image/webp,image/gif" });
+    input.addEventListener("change", function () {
+      var f = input.files[0]; if (!f) return;
+      if (!ghReady()) { out.textContent = "Connect GitHub under Publish & settings to upload. Or put the file in your repo's assets folder and type its path above."; return; }
+      if (f.size > 2.5e6) { out.textContent = "That image is over 2.5 MB. Export a smaller WebP or JPEG (about 1400px wide) and try again."; return; }
+      var name = "assets/" + f.name.toLowerCase().replace(/[^a-z0-9.\-]+/g, "-");
+      out.textContent = "Uploading " + name + "…";
+      var rd = new FileReader();
+      rd.onload = function () {
+        ghPut(name, rd.result.split(",")[1], "Upload " + name).then(function () {
+          item.src = name; changed();
+          var srcInput = body.querySelector("input[type=text]"); if (srcInput) srcInput.value = name;
+          out.textContent = "Uploaded. It goes live with your next publish.";
+        }).catch(function (e) { out.textContent = "Upload failed: " + e.message; });
+      };
+      rd.readAsDataURL(f);
+    });
+    return h("label", { class: "field full", for: id }, [h("span", { text: "Upload screenshot" }), input, out]);
+  }
+
+  function renderContent() {
+    var p = $("p-content"); p.innerHTML = "";
+    SCHEMA.forEach(function (sec) {
+      var target = sec.path ? (state[sec.path] = state[sec.path] || {}) : state;
+      var g = h("div", { class: "grid2" });
+      sec.fields.forEach(function (f) { g.appendChild(fieldEl(f, target)); });
+      p.appendChild(h("section", { class: "card" }, [
+        h("h2", { text: sec.title }), sec.hint ? h("p", { class: "hint", text: sec.hint }) : null, g
+      ]));
+    });
+  }
+
+  // ================= GitHub =================
+  function ghReady() { return gh.owner && gh.repo && gh.token; }
+  function ghUrl(path) { return "https://api.github.com/repos/" + encodeURIComponent(gh.owner) + "/" + encodeURIComponent(gh.repo) + "/contents/" + path; }
+  function ghHeaders() { return { "Authorization": "Bearer " + gh.token, "Accept": "application/vnd.github+json", "X-GitHub-Api-Version": "2022-11-28" }; }
+  function ghErr(r) {
+    return r.json().catch(function () { return {}; }).then(function (j) {
+      var m = j.message || ("HTTP " + r.status);
+      if (r.status === 401) m = "GitHub rejected the token. Check it hasn't expired.";
+      if (r.status === 404) m = "Repository, branch or file not found, or the token can't access this repo.";
+      if (r.status === 403) m = "The token needs Contents: read and write on this repo. (" + m + ")";
+      if (r.status === 409) m = "The file changed on GitHub since you loaded it. Load latest from GitHub, then publish again.";
+      throw new Error(m);
+    });
+  }
+  function ghGet(path) {
+    return fetch(ghUrl(path) + "?ref=" + encodeURIComponent(gh.branch || "main"), { headers: ghHeaders(), cache: "no-store" })
+      .then(function (r) { if (r.status === 404) return null; if (!r.ok) return ghErr(r); return r.json(); });
+  }
+  function ghPut(path, b64, message) {
+    return ghGet(path).then(function (existing) {
+      var body = { message: message, content: b64, branch: gh.branch || "main" };
+      if (existing && existing.sha) body.sha = existing.sha;
+      return fetch(ghUrl(path), { method: "PUT", headers: Object.assign({ "Content-Type": "application/json" }, ghHeaders()), body: JSON.stringify(body) })
+        .then(function (r) { if (!r.ok) return ghErr(r); return r.json(); });
+    });
+  }
+
+  function publish() {
+    var btn = $("publish-btn");
+    if (!ghReady()) { selectTab("publish"); flash("pub-msg", "Connect GitHub first, or use Download content.json and upload it to your host.", "warn"); return; }
+    btn.disabled = true; btn.textContent = "Publishing…";
+    var json = JSON.stringify(state, null, 2) + "\n";
+    ghPut("content.json", b64encode(json), "Update portfolio content")
+      .then(function () {
+        published = JSON.stringify(state); setDirty();
+        flash("pub-msg", "Published. GitHub Pages usually updates the live site within 1–2 minutes.", "ok");
+        toast("Published");
+      })
+      .catch(function (e) { selectTab("publish"); flash("pub-msg", "Publish failed: " + e.message, "bad"); })
+      .then(function () { btn.disabled = false; btn.textContent = "Publish"; });
+  }
+
+  // ================= Tracked links =================
+  var links = lsGet("portfolio-links", []);
+  function saveLinks() { lsSet("portfolio-links", links); }
+  function siteUrl() { var u = lsGet("portfolio-site-url", ""); return u || location.href.replace(/admin\.html.*$/, ""); }
+  function newCode() { var a = "abcdefghjkmnpqrstuvwxyz23456789", s = ""; for (var i = 0; i < 6; i++) s += a[Math.floor(Math.random() * a.length)]; return s; }
+  var visitsByCode = null; // from analytics
+
+  function renderLinks() {
+    var p = $("p-links"); p.innerHTML = "";
+    var company = h("input", { type: "text", id: "l-company", placeholder: "Company, e.g. Noon" });
+    var role = h("input", { type: "text", id: "l-role", placeholder: "Role, e.g. Senior PM, Marketplace" });
+    var date = h("input", { type: "date", id: "l-date" }); date.value = new Date().toISOString().slice(0, 10);
+    var add = h("button", { class: "btn sm", type: "button", onclick: function () {
+      if (!company.value.trim()) { company.focus(); return; }
+      links.unshift({ code: newCode(), company: company.value.trim(), role: role.value.trim(), sent: date.value, stage: "Sent", notes: "" });
+      saveLinks(); renderLinks();
+    } }, ["Create link"]);
+    var siteIn = h("input", { type: "url", id: "l-site", placeholder: "https://yourname.github.io/portfolio/" });
+    siteIn.value = siteUrl();
+    siteIn.addEventListener("change", function () { lsSet("portfolio-site-url", siteIn.value.trim()); renderLinks(); });
+
+    p.appendChild(h("section", { class: "card" }, [
+      h("h2", { text: "Tracked links" }),
+      h("p", { class: "hint", text: "Create one link per application. When someone opens it, Analytics counts a visit for that code. The company names stay in this browser only; visitors just see a short code in the URL." }),
+      h("div", { class: "grid2" }, [
+        h("label", { class: "field", for: "l-company" }, [h("span", { text: "Company" }), company]),
+        h("label", { class: "field", for: "l-role" }, [h("span", { text: "Role" }), role]),
+        h("label", { class: "field", for: "l-date" }, [h("span", { text: "Sent on" }), date]),
+        h("label", { class: "field", for: "l-site" }, [h("span", { text: "Your live site address" }), siteIn])
+      ]),
+      h("div", { class: "list-actions" }, [add])
+    ]));
+
+    var STAGES = ["Sent", "Opened", "Screen", "Interview", "Offer", "Closed"];
+    var rows = links.map(function (l, i) {
+      var url = siteUrl().replace(/[?#].*$/, "") + "?r=" + l.code;
+      var visits = visitsByCode ? (visitsByCode[l.code] || 0) : "–";
+      var sel = h("select", { "aria-label": "Stage for " + l.company }, STAGES.map(function (s) { return h("option", { value: s, text: s }); }));
+      sel.value = l.stage || "Sent";
+      sel.addEventListener("change", function () { l.stage = sel.value; saveLinks(); });
+      var notes = h("input", { type: "text", "aria-label": "Notes for " + l.company, placeholder: "Notes" });
+      notes.value = l.notes || "";
+      notes.addEventListener("change", function () { l.notes = notes.value; saveLinks(); });
+      var copyBtn = h("button", { class: "mini", type: "button", onclick: function () {
+        navigator.clipboard.writeText(url).then(function () { copyBtn.textContent = "Copied"; setTimeout(function () { copyBtn.textContent = "Copy link"; }, 1500); }, function () { prompt("Copy this link", url); });
+      } }, ["Copy link"]);
+      var del = h("button", { class: "mini danger", type: "button", onclick: function () {
+        if (del.dataset.armed) { links.splice(i, 1); saveLinks(); renderLinks(); }
+        else { del.dataset.armed = "1"; del.textContent = "Sure?"; setTimeout(function () { if (del.isConnected) { delete del.dataset.armed; del.textContent = "Remove"; } }, 3000); }
+      } }, ["Remove"]);
+      return h("tr", {}, [
+        h("td", {}, [h("strong", { text: l.company }), h("div", { style: "color:var(--muted)", text: l.role || "" })]),
+        h("td", { class: "code", text: url }),
+        h("td", { class: "num", text: l.sent || "" }),
+        h("td", { class: "num", text: String(visits) }),
+        h("td", {}, [sel]), h("td", {}, [notes]),
+        h("td", {}, [h("div", { class: "row-inline" }, [copyBtn, del])])
+      ]);
+    });
+    var table = links.length
+      ? h("div", { class: "tbl" }, [h("table", {}, [h("thead", {}, [h("tr", {}, ["Company", "Link", "Sent", "Visits", "Stage", "Notes", ""].map(function (t, i) { return h("th", { class: i === 2 || i === 3 ? "num" : null, text: t }); }))]), h("tbody", {}, rows)])])
+      : h("p", { class: "hint", text: "No links yet. Add the first company you're applying to above." });
+
+    var exportBtn = h("button", { class: "mini", type: "button", onclick: function () { download("tracked-links-backup.json", JSON.stringify(links, null, 2)); } }, ["Download backup"]);
+    var importIn = h("input", { type: "file", accept: "application/json", id: "l-import", style: "display:none" });
+    importIn.addEventListener("change", function () {
+      var f = importIn.files[0]; if (!f) return;
+      f.text().then(function (t) { var arr = JSON.parse(t); if (!Array.isArray(arr)) throw 0; links = arr; saveLinks(); renderLinks(); }).catch(function () { toast("That file isn't a links backup"); });
+    });
+    var importBtn = h("button", { class: "mini", type: "button", onclick: function () { importIn.click(); } }, ["Restore backup"]);
+
+    p.appendChild(h("section", { class: "card" }, [
+      h("h2", { text: "Applications" }),
+      h("p", { class: "hint", text: visitsByCode ? "Visits are for the period selected in Analytics." : "Load Analytics to fill in the Visits column." }),
+      table, h("div", { class: "list-actions" }, [exportBtn, importBtn, importIn])
+    ]));
+  }
+
+  // ================= Analytics =================
+  var gcToken = lsGet("portfolio-gc-token", "");
+  var gcDays = lsGet("portfolio-gc-days", 30);
+  var EXAMPLE = {
+    total: 186, events: 241,
+    daily: Array.from({ length: 30 }, function (_, i) { return [3, 5, 2, 8, 6, 4, 9, 12, 7, 5, 3, 6, 10, 14, 8, 6, 4, 5, 7, 9, 11, 6, 3, 2, 5, 8, 4, 6, 9, 5][i]; }),
+    hits: [
+      { path: "case/order-speed", count: 64, event: true }, { path: "case/seller-journey", count: 58, event: true },
+      { path: "case/installments", count: 31, event: true }, { path: "case/minicash-automation", count: 22, event: true },
+      { path: "section/contact", count: 41, event: true }, { path: "click/linkedin", count: 12, event: true },
+      { path: "click/email-copy", count: 6, event: true }, { path: "click/cv-download", count: 9, event: true }
+    ]
+  };
+
+  function iso(d) { d = new Date(d); d.setUTCMinutes(0, 0, 0); return d.toISOString().replace(/\.\d{3}Z$/, "Z"); }
+  function gcFetch(code, path, qs) {
+    return fetch("https://" + code + ".goatcounter.com/api/v0/" + path + "?" + qs, { headers: { "Authorization": "Bearer " + gcToken, "Content-Type": "application/json" } })
+      .then(function (r) {
+        if (r.status === 401 || r.status === 403) throw new Error("GoatCounter rejected the API key. Create one with 'Read statistics' permission.");
+        if (!r.ok) throw new Error("GoatCounter returned HTTP " + r.status + ".");
+        return r.json();
+      }, function () { throw new Error("NETWORK"); });
+  }
+
+  function loadStats() {
+    var code = (state.settings || {}).goatcounter;
+    var out = $("a-out");
+    if (!code || !gcToken) { drawStats(EXAMPLE, true); return; }
+    out.innerHTML = '<p class="hint">Loading statistics…</p>';
+    var end = new Date(Date.now() + 3600e3), start = new Date(Date.now() - gcDays * 864e5);
+    var qs = "start=" + encodeURIComponent(iso(start)) + "&end=" + encodeURIComponent(iso(end));
+    Promise.all([gcFetch(code, "stats/total", qs), gcFetch(code, "stats/hits", qs + "&limit=100")])
+      .then(function (res) {
+        var t = res[0], hlist = res[1];
+        var byDay = {};
+        (t.stats || []).forEach(function (s) { byDay[s.day] = (byDay[s.day] || 0) + (s.daily || 0); });
+        var days = [];
+        for (var i = gcDays - 1; i >= 0; i--) { var d = new Date(Date.now() - i * 864e5).toISOString().slice(0, 10); days.push(byDay[d] || 0); }
+        drawStats({ total: t.total || 0, events: t.total_events || 0, daily: days, hits: (hlist.hits || []).map(function (x) { return { path: x.path, count: x.count, event: x.event }; }) }, false);
+      })
+      .catch(function (e) {
+        var dash = "https://" + code + ".goatcounter.com";
+        out.innerHTML = "";
+        out.appendChild(h("div", { class: "msg " + (e.message === "NETWORK" ? "warn" : "bad") }, [
+          e.message === "NETWORK" ? "Your browser couldn't reach the GoatCounter API from this page. Your stats are still being collected; open them in your GoatCounter dashboard: " : e.message + " Dashboard: ",
+          h("a", { href: dash, target: "_blank", rel: "noopener", text: dash.replace("https://", "") })
+        ]));
+      });
+  }
+
+  function drawStats(d, example) {
+    var out = $("a-out"); out.innerHTML = "";
+    var ev = {}; d.hits.forEach(function (x) { if (x.event || /^(case|click|ref|section|filter)\//.test(x.path)) ev[x.path] = (ev[x.path] || 0) + x.count; });
+    var sumPrefix = function (pre) { return Object.keys(ev).filter(function (k) { return k.indexOf(pre) === 0; }).reduce(function (s, k) { return s + ev[k]; }, 0); };
+    var caseReads = sumPrefix("case/"), contactSeen = ev["section/contact"] || 0;
+    var contacted = (ev["click/email-copy"] || 0) + (ev["click/email-click"] || 0) + (ev["click/linkedin"] || 0);
+    var cv = ev["click/cv-download"] || 0;
+
+    visitsByCode = {};
+    Object.keys(ev).forEach(function (k) { if (k.indexOf("ref/") === 0) visitsByCode[k.slice(4)] = ev[k]; });
+    if (example) visitsByCode = null;
+
+    var tag = example ? h("span", { class: "example", text: "EXAMPLE DATA" }) : null;
+    out.appendChild(h("div", { class: "kpis" }, [
+      kpi("Page visits", d.total, "last " + d.daily.length + " days"),
+      kpi("Case study reads", caseReads, "read for 1.5s or more"),
+      kpi("Contact actions", contacted, "email or LinkedIn clicks"),
+      kpi("CV downloads", cv, "")
+    ]));
+    if (tag) out.firstChild.before(h("p", { class: "hint" }, [tag, " Add your GoatCounter code and API key above to see your real numbers."]));
+
+    // daily chart
+    var W = 720, H = 180, pad = { l: 30, r: 8, t: 10, b: 22 }, n = d.daily.length, max = Math.max.apply(null, d.daily.concat([1]));
+    var step = Math.ceil(max / 4) || 1, top = step * 4;
+    var bw = (W - pad.l - pad.r) / n;
+    var svg = '<svg class="chart" viewBox="0 0 ' + W + " " + H + '" role="img" aria-label="Daily visits">';
+    for (var g = 0; g <= 4; g++) { var y = pad.t + (H - pad.t - pad.b) * (1 - g / 4); svg += '<line class="grid" x1="' + pad.l + '" x2="' + (W - pad.r) + '" y1="' + y + '" y2="' + y + '"/><text x="' + (pad.l - 6) + '" y="' + (y + 3) + '" text-anchor="end">' + step * g + "</text>"; }
+    d.daily.forEach(function (v, i) {
+      var bh = (H - pad.t - pad.b) * v / top, x = pad.l + i * bw + 1;
+      svg += '<rect class="b' + (i === n - 1 ? " last" : "") + '" x="' + x.toFixed(1) + '" y="' + (H - pad.b - bh).toFixed(1) + '" width="' + Math.max(bw - 2, 1).toFixed(1) + '" height="' + bh.toFixed(1) + '" rx="1.5"><title>' + v + "</title></rect>";
+    });
+    svg += '<text x="' + pad.l + '" y="' + (H - 6) + '">' + n + ' days ago</text><text x="' + (W - pad.r) + '" y="' + (H - 6) + '" text-anchor="end">today</text></svg>';
+
+    // funnel
+    var caseMax = Object.keys(ev).filter(function (k) { return k.indexOf("case/") === 0; }).reduce(function (m, k) { return Math.max(m, ev[k]); }, 0);
+    var steps = [["Visited", d.total], ["Read a case study", Math.min(caseMax, d.total)], ["Reached contact", Math.min(contactSeen, d.total)], ["Took a contact action", Math.min(contacted, d.total)]];
+    var fMax = Math.max(steps[0][1], 1);
+    var funnel = h("div", { class: "funnel" }, steps.map(function (s) {
+      return h("div", { class: "fstep" }, [h("span", { text: s[0] }), h("div", { class: "track" }, [h("div", { class: "fill", style: "width:" + (s[1] / fMax * 100) + "%" })]), h("strong", { class: "num", style: "text-align:right", text: String(s[1]) })]);
+    }));
+
+    out.appendChild(h("div", { class: "two" }, [
+      h("div", { class: "card" }, [h("h2", { text: "Visits per day" }), h("div", { html: svg })]),
+      h("div", { class: "card" }, [h("h2", { text: "Recruiter funnel" }), h("p", { class: "hint", text: "Approximate: case-study step uses the most-read case study." }), funnel])
+    ]));
+
+    // case table
+    var caseRows = (state.cases || []).map(function (c) { return [c.title, ev["case/" + c.id] || 0]; }).sort(function (a, b) { return b[1] - a[1]; });
+    var linkRows = [["LinkedIn", ev["click/linkedin"] || 0], ["Email clicked", ev["click/email-click"] || 0], ["Email copied", ev["click/email-copy"] || 0], ["CV downloaded", cv], ["“See case studies” button", ev["click/cta-case-studies"] || 0]];
+    out.appendChild(h("div", { class: "two" }, [
+      tableCard("Case studies by reads", ["Case study", "Reads"], caseRows),
+      tableCard("Actions", ["Action", "Count"], linkRows)
+    ]));
+    if (!example) renderLinks();
+  }
+  function kpi(label, v, sub) { return h("div", { class: "kpi" }, [h("span", { class: "label", text: label }), h("b", { text: String(v) }), h("small", { text: sub })]); }
+  function tableCard(title, head, rows) {
+    return h("div", { class: "card" }, [h("h2", { text: title }), h("div", { class: "tbl" }, [h("table", {}, [
+      h("thead", {}, [h("tr", {}, head.map(function (t, i) { return h("th", { class: i ? "num" : null, text: t }); }))]),
+      h("tbody", {}, rows.map(function (r) { return h("tr", {}, [h("td", { text: r[0] }), h("td", { class: "num", text: String(r[1]) })]); }))
+    ])])]);
+  }
+
+  function renderAnalytics() {
+    var p = $("p-analytics"); p.innerHTML = "";
+    state.settings = state.settings || {};
+    var code = h("input", { type: "text", id: "a-code", placeholder: "e.g. ahmadyehia" }); code.value = state.settings.goatcounter || "";
+    code.addEventListener("input", function () { state.settings.goatcounter = code.value.trim().toLowerCase(); changed(); });
+    var tok = h("input", { type: "password", id: "a-token", placeholder: "Paste API key", autocomplete: "off" }); tok.value = gcToken;
+    tok.addEventListener("change", function () { gcToken = tok.value.trim(); lsSet("portfolio-gc-token", gcToken); loadStats(); });
+    var days = h("select", { id: "a-days" }, [[7, "Last 7 days"], [30, "Last 30 days"], [90, "Last 90 days"]].map(function (o) { return h("option", { value: o[0], text: o[1] }); }));
+    days.value = String(gcDays);
+    days.addEventListener("change", function () { gcDays = +days.value; lsSet("portfolio-gc-days", gcDays); loadStats(); });
+    var skip = false; try { skip = localStorage.getItem("skipgc") === "t"; } catch (e) {}
+    var skipCb = h("input", { type: "checkbox", id: "a-skip" }); skipCb.checked = skip;
+    skipCb.addEventListener("change", function () { try { if (skipCb.checked) localStorage.setItem("skipgc", "t"); else localStorage.removeItem("skipgc"); } catch (e) {} });
+
+    p.appendChild(h("section", { class: "card" }, [
+      h("h2", { text: "Analytics" }),
+      h("p", { class: "hint", html: "Powered by <a href=\"https://www.goatcounter.com\" target=\"_blank\" rel=\"noopener\">GoatCounter</a> (free, no cookies, so no cookie banner needed). The site code goes live when you publish. The API key stays in this browser." }),
+      h("div", { class: "grid2" }, [
+        h("label", { class: "field", for: "a-code" }, [h("span", { text: "GoatCounter site code" }), code, h("small", { text: "The part before .goatcounter.com" })]),
+        h("label", { class: "field", for: "a-token" }, [h("span", { text: "API key (read statistics)" }), tok, h("small", { text: "GoatCounter → Settings → API. Only stored in this browser." })]),
+        h("label", { class: "field", for: "a-days" }, [h("span", { text: "Period" }), days]),
+        h("label", { class: "check field", for: "a-skip" }, [skipCb, "Don't count my own visits from this browser"])
+      ])
+    ]));
+    p.appendChild(h("div", { id: "a-out", class: "panel" }));
+    loadStats();
+  }
+
+  // ================= Publish & settings =================
+  function renderPublish() {
+    var p = $("p-publish"); p.innerHTML = "";
+    function ghField(k, label, type, ph, help) {
+      var i = h("input", { type: type || "text", id: "g-" + k, placeholder: ph || "", autocomplete: "off" }); i.value = gh[k] || "";
+      i.addEventListener("change", function () { gh[k] = i.value.trim(); lsSet("portfolio-github", gh); });
+      return h("label", { class: "field", for: "g-" + k }, [h("span", { text: label }), i, help ? h("small", { text: help }) : null]);
+    }
+    var test = h("button", { class: "mini", type: "button", onclick: function () {
+      if (!ghReady()) { flash("gh-msg", "Fill in owner, repository and token first.", "warn"); return; }
+      flash("gh-msg", "Checking…");
+      ghGet("content.json").then(function (f) {
+        flash("gh-msg", f ? "Connected. Found content.json on " + (gh.branch || "main") + "." : "Connected, but content.json isn't in this repo yet. Publishing will create it.", f ? "ok" : "warn");
+      }).catch(function (e) { flash("gh-msg", e.message, "bad"); });
+    } }, ["Test connection"]);
+    var pull = h("button", { class: "mini", type: "button", onclick: function () {
+      if (!ghReady()) { flash("gh-msg", "Connect GitHub first.", "warn"); return; }
+      ghGet("content.json").then(function (f) {
+        if (!f) throw new Error("content.json not found in the repo.");
+        state = JSON.parse(b64decode(f.content)); published = JSON.stringify(state); lsSet("portfolio-draft", state);
+        renderAll(); setDirty(); flash("gh-msg", "Loaded the latest content from GitHub.", "ok");
+      }).catch(function (e) { flash("gh-msg", e.message, "bad"); });
+    } }, ["Load latest from GitHub"]);
+    var forget = h("button", { class: "mini danger", type: "button", onclick: function () { gh.token = ""; lsSet("portfolio-github", gh); renderPublish(); flash("gh-msg", "Token removed from this browser.", "ok"); } }, ["Forget token"]);
+
+    p.appendChild(h("section", { class: "card" }, [
+      h("h2", { text: "Publish to GitHub Pages" }),
+      h("p", { class: "hint", text: "Publishing saves content.json to your repo, and GitHub Pages updates the site. Use a fine-grained token limited to this one repository with Contents: Read and write. It's stored only in this browser." }),
+      h("div", { class: "grid2" }, [
+        ghField("owner", "GitHub username", "text", "ahmadyehia"),
+        ghField("repo", "Repository", "text", "portfolio"),
+        ghField("branch", "Branch", "text", "main"),
+        ghField("token", "Access token", "password", "github_pat_…")
+      ]),
+      h("div", { class: "list-actions" }, [test, pull, forget]),
+      h("div", { id: "gh-msg", style: "margin-top:12px" }),
+      h("div", { id: "pub-msg", style: "margin-top:12px" })
+    ]));
+
+    state.settings = state.settings || {};
+    var g = h("div", { class: "grid2" });
+    [{ k: "siteTitle", label: "Browser tab title" }, { k: "cvUrl", label: "CV file path", help: "Leave empty to hide the Download CV button." }, { k: "metaDescription", label: "Search/share description", type: "textarea" }]
+      .forEach(function (f) { g.appendChild(fieldEl(f, state.settings)); });
+    p.appendChild(h("section", { class: "card" }, [h("h2", { text: "Site settings" }), g]));
+
+    var dl = h("button", { class: "mini", type: "button", onclick: function () { download("content.json", JSON.stringify(state, null, 2) + "\n"); } }, ["Download content.json"]);
+    var imp = h("input", { type: "file", accept: "application/json", style: "display:none" });
+    imp.addEventListener("change", function () {
+      var f = imp.files[0]; if (!f) return;
+      f.text().then(function (t) { state = JSON.parse(t); changed(); renderAll(); toast("Imported"); }).catch(function () { toast("That file isn't valid JSON"); });
+    });
+    var impBtn = h("button", { class: "mini", type: "button", onclick: function () { imp.click(); } }, ["Import content.json"]);
+    var discard = h("button", { class: "mini danger", type: "button", onclick: function () {
+      if (!discard.dataset.armed) { discard.dataset.armed = "1"; discard.textContent = "Click again to discard"; return; }
+      loadLive().then(function (c) { state = c; lsSet("portfolio-draft", state); renderAll(); setDirty(); toast("Draft discarded"); });
+    } }, ["Discard unpublished changes"]);
+    p.appendChild(h("section", { class: "card" }, [
+      h("h2", { text: "Manual backup" }),
+      h("p", { class: "hint", text: "Not using GitHub? Download content.json and upload it to your host, replacing the old one." }),
+      h("div", { class: "list-actions" }, [dl, impBtn, imp, discard])
+    ]));
+  }
+
+  // ================= utils =================
+  function download(name, text) {
+    var a = h("a", { href: URL.createObjectURL(new Blob([text], { type: "application/json" })), download: name });
+    document.body.appendChild(a); a.click(); setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 500);
+  }
+  function flash(id, text, kind) { var el = $(id); if (el) { el.innerHTML = ""; el.appendChild(h("div", { class: "msg " + (kind === "bad" ? "bad" : kind === "warn" ? "warn" : ""), text: text })); } }
+  var toastEl;
+  function toast(t) {
+    if (!toastEl) { toastEl = h("div", { role: "status", style: "position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--fg);color:var(--bg);padding:10px 16px;border-radius:999px;font-weight:600;z-index:50" }); document.body.appendChild(toastEl); }
+    toastEl.textContent = t; toastEl.hidden = false; clearTimeout(toastEl._t); toastEl._t = setTimeout(function () { toastEl.hidden = true; }, 2200);
+  }
+  function selectTab(name) {
+    document.querySelectorAll(".tab").forEach(function (t) { t.setAttribute("aria-selected", t.dataset.tab === name ? "true" : "false"); });
+    ["content", "links", "analytics", "publish"].forEach(function (n) { $("p-" + n).hidden = n !== name; });
+    if (name === "analytics") renderAnalytics();
+    if (name === "links") renderLinks();
+    if (name === "publish") renderPublish();
+    try { history.replaceState(null, "", "#" + name); } catch (e) {}
+  }
+  function renderAll() {
+    renderContent();
+    var cur = (location.hash || "#content").slice(1);
+    if (["links", "analytics", "publish"].indexOf(cur) >= 0) selectTab(cur);
+  }
+  function loadLive() { return fetch("content.json", { cache: "no-cache" }).then(function (r) { if (!r.ok) throw new Error(); return r.json(); }); }
+
+  document.querySelectorAll(".tab").forEach(function (t) { t.addEventListener("click", function () { selectTab(t.dataset.tab); }); });
+  $("publish-btn").addEventListener("click", publish);
+  $("preview-btn").addEventListener("click", function () { lsSet("portfolio-draft", state); });
+  window.addEventListener("beforeunload", function (e) { if (state && published !== JSON.stringify(state)) { e.preventDefault(); e.returnValue = ""; } });
+
+  // boot
+  loadLive().then(function (live) {
+    published = JSON.stringify(live);
+    var draft = lsGet("portfolio-draft", null);
+    state = draft || live;
+  }).catch(function () {
+    state = lsGet("portfolio-draft", null) || { settings: {}, profile: {}, ledger: { rows: [] }, cases: [], principles: [], jobs: [], certifications: [], education: [], leadership: [] };
+    published = "";
+  }).then(function () {
+    renderAll(); setDirty();
+  });
+})();
+</script>
+</body>
+</html>

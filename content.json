@@ -1,0 +1,132 @@
+{
+  "settings": {
+    "siteTitle": "Ahmad Yehia — Product Manager",
+    "metaDescription": "Ahmad Yehia, Principal Product Manager in Cairo. Marketplace, eCommerce and fulfillment products.",
+    "goatcounter": "",
+    "cvUrl": "assets/Ahmad-Yehia-CV.pdf"
+  },
+  "profile": {
+    "name": "Ahmad Yehia",
+    "fullName": "Ahmad Yehia Mohammad",
+    "eyebrow": "Principal Product Manager · Marketplace & eCommerce",
+    "headline": "I take order response time from ~~45s~~ to **2s**.",
+    "lede": "I'm Ahmad, a product manager with 8+ years building eCommerce, marketplace and fulfillment products in Cairo. I lead cross-functional squads from discovery to launch, and I measure success by what changes for customers, sellers and the business.",
+    "email": "ahmadyehiam@gmail.com",
+    "linkedin": "https://www.linkedin.com/in/ahmadyehiam",
+    "location": "Cairo, Egypt",
+    "contactHeadline": "Hiring a product lead for marketplace or commerce?",
+    "facts": [
+      { "label": "Now", "value": "Principal PM, b_labs | B.TECH" },
+      { "label": "Squad", "value": "5 engineers + design, UXR, BI" },
+      { "label": "Scope", "value": "Marketplace seller experience, ~50% of online GMV" },
+      { "label": "Based", "value": "Cairo, Egypt" },
+      { "label": "Cert.", "value": "CSPO · Product Analytics (Product School)" }
+    ]
+  },
+  "ledger": {
+    "intro": "Before and after, measured. Bars in each row share one scale.",
+    "note": "Time ranges are drawn at their midpoint. Load time is indexed to 100 before the upgrade.",
+    "rows": [
+      { "title": "Order response time", "context": "Checkout, H2 2023 → H2 2024", "before": 45, "after": 2, "beforeLabel": "45s", "afterLabel": "2s", "delta": "−96%", "sub": "faster orders" },
+      { "title": "Seller payout cycle", "context": "Order to cashout, in days", "before": 17.5, "after": 7, "beforeLabel": "2–3 wk", "afterLabel": "1 wk", "delta": "~2.5×", "sub": "faster payouts" },
+      { "title": "Seller support lead time", "context": "New seller support center, in days", "before": 10.5, "after": 4.5, "beforeLabel": "1–2 wk", "afterLabel": "4–5 d", "delta": "~2×", "sub": "faster answers" },
+      { "title": "MiniCash throughput", "context": "Order processing capacity", "before": 50, "after": 95, "beforeLabel": "50%", "afterLabel": "95%", "delta": "+45 pts", "sub": "−20% ops cost" },
+      { "title": "Page load time", "context": "Platform upgrade, indexed", "before": 100, "after": 60, "beforeLabel": "100", "afterLabel": "60", "delta": "−40%", "sub": "lower bounce" }
+    ]
+  },
+  "cases": [
+    {
+      "id": "seller-journey",
+      "category": "seller",
+      "wide": true,
+      "tag": "Marketplace · Sellers",
+      "period": "2024 – now",
+      "title": "Fixing the seller journey after the sale",
+      "result": "Payout cycle: 2–3 weeks → a fixed 1-week window. Support lead time: 1–2 weeks → 4–5 days.",
+      "sections": [
+        { "label": "Problem", "text": "Marketplace sellers waited weeks for cashouts and support answers, which hurt trust in a channel that drives about half of online GMV." },
+        { "label": "What I did", "text": "Led the seller-experience squad across onboarding, listing and performance. We launched a seller support center and rebuilt order-to-payout into a regular weekly cycle." },
+        { "label": "Next", "text": "Multi-user access for the seller portal: one email + OTP login for everyone. Category managers see a select-seller view, and seller staff get access by permission." }
+      ],
+      "images": [
+        { "src": "assets/seller-payouts.webp", "alt": "Seller portal Statements and Payouts page with weekly statement periods and payout status", "caption": "Statements & Payouts: weekly settlement periods, an estimated running balance, and payout status per statement." },
+        { "src": "assets/seller-support.webp", "alt": "Seller portal Support center listing seller cases with category and status", "caption": "Support center: sellers open cases by category and track them to resolution, in Arabic or English." }
+      ],
+      "todo": "Add: seller NPS, active seller count or GMV change"
+    },
+    {
+      "id": "order-speed",
+      "category": "customer",
+      "wide": false,
+      "tag": "eCommerce · Checkout",
+      "period": "H2 2023 – H2 2024",
+      "title": "Order response time from 45 seconds to 2",
+      "result": "Order response time cut from 45s to 2s, plus 40% faster page loads after a platform upgrade.",
+      "sections": [
+        { "label": "Problem", "text": "Placing an order took up to 45 seconds and sometimes crashed, so customers dropped off at the most valuable step." },
+        { "label": "What I did", "text": "Led a platform upgrade with my squad and fixed order-placement crashes, including combined orders mixing B.TECH and third-party products." },
+        { "label": "Result", "text": "2-second responses, lower bounce rates, and +3% conversion for returning MiniCash customers." }
+      ],
+      "images": [],
+      "todo": "Add: how you found the root cause and what you prioritised first"
+    },
+    {
+      "id": "installments",
+      "category": "customer",
+      "wide": false,
+      "tag": "Payments",
+      "period": "Launch",
+      "title": "Bank installments for high-ticket purchases",
+      "result": "60% above sales target in the first month; high-ticket sales up 2%.",
+      "sections": [
+        { "label": "Problem", "text": "Customers buying expensive electronics had few ways to spread the cost online." },
+        { "label": "What I did", "text": "Launched bank installments as a payment option at checkout, working with banking partners, payments and operations." },
+        { "label": "Related", "text": "With the Supply Chain team, introduced cash-on-delivery fees. This created a new revenue stream and reduced COD reliance by 1%." }
+      ],
+      "images": [],
+      "todo": "Add: number of bank partners and how the launch was rolled out"
+    },
+    {
+      "id": "minicash-automation",
+      "category": "ops",
+      "wide": false,
+      "tag": "Operations · Automation",
+      "period": "2021 – 2023",
+      "title": "Automating MiniCash order processing",
+      "result": "Throughput capacity 50% → 95%; operational costs and lost sales down 20%.",
+      "sections": [
+        { "label": "Problem", "text": "MiniCash consumer-finance orders depended on manual processing. Capacity ran at half of demand, and slow orders became lost sales." },
+        { "label": "What I did", "text": "Led the implementation of end-to-end order processing automation, working with operations and engineering to remove manual steps." },
+        { "label": "Result", "text": "Nearly double the throughput with a 20% cut in operational costs and lost sales." }
+      ],
+      "images": [],
+      "todo": "Add: which manual steps were removed and how you measured capacity"
+    }
+  ],
+  "principles": [
+    { "title": "Metrics first", "text": "Every squad goal starts with a success metric tied to a business objective, set quarterly and reviewed with BI." },
+    { "title": "Both sides of the market", "text": "I've led squads for end consumers and for marketplace sellers, so I design for how each side's experience affects the other." },
+    { "title": "Ship with the whole team", "text": "Design, UX research, data and engineering work as one squad, and cross-team bets like Brand Shops are delivered with partner teams." }
+  ],
+  "experienceIntro": "8+ years across commerce, logistics and mobility products.",
+  "jobs": [
+    { "when": "Sep 2023 – Present", "role": "Principal Product Manager", "company": "b_labs | B.TECH, Cairo", "current": true, "text": "Leads the marketplace seller-experience squad (acquisition through performance management). Previously led the consumer shopping-experience squad of 6 engineers. Shipped installments, Brand Shops with the Ads team, COD fees, and 3PL integration improvements." },
+    { "when": "Dec 2021 – Aug 2023", "role": "Product Manager", "company": "B.TECH, Cairo", "current": false, "text": "Led MiniCash order processing automation: throughput from 50% to 95% and a 20% cut in operational costs and lost sales." },
+    { "when": "Dec 2019 – Nov 2021", "role": "Product Owner", "company": "SURVV, Cairo", "current": false, "text": "Owned the rider app end to end for hundreds of active riders, improving onboarding and real-time order tracking." },
+    { "when": "Oct 2017 – Oct 2019", "role": "Product Owner", "company": "Robusta Studio, Cairo", "current": false, "text": "Shipped a web and mobile ticket-booking system with real-time tracking for thousands of users, and a back-office platform for schedules, routes and customer operations." }
+  ],
+  "certifications": [
+    { "name": "Product Analytics Micro-Certification, Product School", "year": "2024" },
+    { "name": "Leading in the Digital Age, edX", "year": "2021" },
+    { "name": "Foundations of Project Management, Google", "year": "2021" },
+    { "name": "Driving Digital Innovation through Experimentation, edX", "year": "2021" },
+    { "name": "Business Analytics for Data-Driven Decisions, edX", "year": "2020" },
+    { "name": "Certified Scrum Product Owner (CSPO)", "year": "2019" }
+  ],
+  "education": [
+    { "name": "B.Sc. Mechatronics Engineering, Arab Academy for Science, Technology & Maritime Transport", "year": "2013" }
+  ],
+  "leadership": [
+    { "name": "Matching Team Leader, AIESEC Cairo", "year": "2013" }
+  ]
+}
