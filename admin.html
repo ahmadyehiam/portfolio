@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=Public+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
-<link rel="stylesheet" href="assets/site.css">
+<link rel="stylesheet" href="assets/admin.css">
 <style>
 /* Back-office: sticky top bar with tabs + status, single working column. Reuses site tokens. */
 :root{ --ok:#1F7A4D; --warn:#A86A00; --bad:#B3261E; }
@@ -155,51 +155,40 @@ td.num, th.num{text-align:right; font-variant-numeric:tabular-nums}
   // ================= schema =================
   var CAT = [["seller", "Sellers"], ["customer", "Customers"], ["ops", "Operations"]];
   var SCHEMA = [
-    { title: "Profile & hero", hint: "The top of the page. In the headline, wrap the old value in ~~tildes~~ and the new value in **stars** to style them.", path: "profile", fields: [
+    { title: "Profile & hero", hint: "The top of the page. In the headline, wrap words in **double stars** to underline them in orange.", path: "profile", fields: [
       { k: "name", label: "Short name" }, { k: "fullName", label: "Full name" },
-      { k: "eyebrow", label: "Title line", full: true },
-      { k: "headline", label: "Headline", full: true, help: "Example: I take order response time from ~~45s~~ to **2s**." },
+      { k: "roles", label: "Title (first line is shown)", type: "lines", help: "Shown in small capitals above the headline, with your city." },
+      { k: "location", label: "Location" },
+      { k: "tagline", label: "Headline", full: true, help: "Example: I make marketplaces and checkout **measurably faster**." },
       { k: "lede", label: "Intro paragraph", type: "textarea", full: true },
       { k: "email", label: "Email", type: "email" }, { k: "linkedin", label: "LinkedIn URL", type: "url" },
-      { k: "location", label: "Location" }, { k: "contactHeadline", label: "Contact headline" },
-      { k: "facts", label: "Quick facts", type: "list", itemTitle: "label", fields: [{ k: "label", label: "Label" }, { k: "value", label: "Value" }], blank: { label: "", value: "" } }
+      { k: "about", label: "About story", type: "textarea", full: true, help: "One or two lines, in your own words, shown large at the top of About." },
+      { k: "contactHeadline", label: "Contact headline", full: true }
     ] },
-    { title: "Impact ledger", hint: "Before/after metrics. Bars use the numbers; the labels are what visitors read.", path: "ledger", fields: [
-      { k: "intro", label: "Intro line", full: true }, { k: "note", label: "Footnote", full: true },
-      { k: "rows", label: "Metrics", type: "list", itemTitle: "title", fields: [
-        { k: "title", label: "Metric" }, { k: "context", label: "Context" },
-        { k: "before", label: "Before (number)", type: "number" }, { k: "after", label: "After (number)", type: "number" },
-        { k: "beforeLabel", label: "Before label" }, { k: "afterLabel", label: "After label" },
-        { k: "delta", label: "Headline change" }, { k: "sub", label: "Under the change" }
-      ], blank: { title: "New metric", context: "", before: 100, after: 50, beforeLabel: "100", afterLabel: "50", delta: "−50%", sub: "" } }
+    { title: "Results", hint: "The row of before → after numbers under the hero. Four fit best.", path: null, fields: [
+      { k: "stats", label: "Results", type: "list", itemTitle: "value", fields: [{ k: "value", label: "Number (e.g. 45s → 2s)" }, { k: "label", label: "What it measures" }], blank: { value: "", label: "" } }
     ] },
-    { title: "Case studies", hint: "Shown in this order. The gold note is only visible in Preview, so use it as your to-do.", path: null, fields: [
+    { title: "Case studies", hint: "Shown in this order. Each row shows the title, result line and tag; the story blocks and screenshots open on click. The private note only shows in Preview.", path: null, fields: [
       { k: "cases", label: "Case studies", type: "list", itemTitle: "title", fields: [
         { k: "title", label: "Title", full: true },
-        { k: "category", label: "Filter group", type: "select", options: CAT },
+        { k: "period", label: "Date stamp" },
         { k: "id", label: "Short id (for analytics)", help: "Lowercase letters and dashes. Changing it starts a new count." },
-        { k: "tag", label: "Tag" }, { k: "period", label: "Period" },
-        { k: "wide", label: "Full width", type: "check" },
-        { k: "result", label: "Result (highlighted)", type: "textarea", full: true },
+        { k: "result", label: "Result line", type: "textarea", full: true },
+        { k: "tag", label: "Tags (e.g. Marketplace · Sellers)", full: true },
         { k: "sections", label: "Story blocks", type: "list", itemTitle: "label", fields: [{ k: "label", label: "Label" }, { k: "text", label: "Text", type: "textarea", full: true }], blank: { label: "Label", text: "" } },
         { k: "images", label: "Screenshots", type: "list", itemTitle: "caption", image: true, fields: [{ k: "src", label: "Image path or URL", full: true }, { k: "alt", label: "Alt text (describe the image)", full: true }, { k: "caption", label: "Caption", full: true }], blank: { src: "", alt: "", caption: "" } },
         { k: "todo", label: "Private note (preview only)", full: true }
       ], blank: { id: "new-case", category: "customer", wide: false, tag: "", period: "", title: "New case study", result: "", sections: [{ label: "Problem", text: "" }, { label: "What I did", text: "" }, { label: "Result", text: "" }], images: [], todo: "" } }
     ] },
-    { title: "How I work", path: null, fields: [
-      { k: "principles", label: "Principles", type: "list", itemTitle: "title", fields: [{ k: "title", label: "Title" }, { k: "text", label: "Text", type: "textarea", full: true }], blank: { title: "New principle", text: "" } }
-    ] },
-    { title: "Experience", path: null, fields: [
-      { k: "experienceIntro", label: "Intro line", full: true },
+    { title: "About: experience", path: null, fields: [
+      { k: "experienceIntro", label: "Line under your story", full: true },
       { k: "jobs", label: "Roles (newest first)", type: "list", itemTitle: "role", fields: [
-        { k: "role", label: "Role" }, { k: "company", label: "Company" }, { k: "when", label: "Dates" },
-        { k: "current", label: "Current role", type: "check" }, { k: "text", label: "Summary", type: "textarea", full: true }
+        { k: "role", label: "Role" }, { k: "company", label: "Company" }, { k: "when", label: "Dates" }
       ], blank: { when: "", role: "New role", company: "", current: false, text: "" } }
     ] },
-    { title: "Credentials", path: null, fields: [
-      { k: "certifications", label: "Certifications", type: "list", itemTitle: "name", fields: [{ k: "name", label: "Name" }, { k: "year", label: "Year" }], blank: { name: "", year: "" } },
+    { title: "About: credentials", hint: "Shown as one line of education and certifications.", path: null, fields: [
       { k: "education", label: "Education", type: "list", itemTitle: "name", fields: [{ k: "name", label: "Name" }, { k: "year", label: "Year" }], blank: { name: "", year: "" } },
-      { k: "leadership", label: "Leadership", type: "list", itemTitle: "name", fields: [{ k: "name", label: "Name" }, { k: "year", label: "Year" }], blank: { name: "", year: "" } }
+      { k: "certifications", label: "Certifications", type: "list", itemTitle: "name", fields: [{ k: "name", label: "Name" }, { k: "year", label: "Year" }], blank: { name: "", year: "" } }
     ] }
   ];
 
@@ -212,6 +201,18 @@ td.num, th.num{text-align:right; font-variant-numeric:tabular-nums}
       cb.checked = !!obj[def.k];
       cb.addEventListener("change", function () { obj[def.k] = cb.checked; changed(); });
       return h("label", { class: "check field" + (def.full ? " full" : ""), for: id }, [cb, def.label]);
+    }
+    if (def.type === "lines") {
+      var ta = h("textarea", { id: id });
+      ta.value = (obj[def.k] || []).join("\n");
+      ta.addEventListener("input", function () { obj[def.k] = ta.value.split("\n").map(function (x) { return x.trim(); }).filter(Boolean); changed(); });
+      return h("label", { class: "field" + (def.full ? " full" : ""), for: id }, [h("span", { text: def.label }), ta, def.help ? h("small", { text: def.help }) : null]);
+    }
+    if (def.type === "image") {
+      var ti = h("input", { type: "text", id: id, placeholder: "assets/photo.jpg" });
+      ti.value = obj[def.k] || "";
+      ti.addEventListener("input", function () { obj[def.k] = ti.value.trim(); changed(); });
+      return h("div", { class: "field full" }, [h("label", { for: id }, [h("span", { text: def.label })]), ti, def.help ? h("small", { text: def.help }) : null, uploadEl(obj, def.k, ti, "Upload photo")]);
     }
     var input;
     if (def.type === "textarea") input = h("textarea", { id: id });
@@ -255,7 +256,7 @@ td.num, th.num{text-align:right; font-variant-numeric:tabular-nums}
         else g.appendChild(el);
       });
       body.appendChild(g);
-      if (def.image) body.appendChild(uploadEl(item, body));
+      if (def.image) body.appendChild(uploadEl(item, "src", body.querySelector("input[type=text]"), "Upload screenshot"));
       return h("details", { class: "item" }, [h("summary", {}, [titleSpan, up, dn, del]), body]);
     }
     redraw();
@@ -265,7 +266,7 @@ td.num, th.num{text-align:right; font-variant-numeric:tabular-nums}
     return wrap;
   }
 
-  function uploadEl(item, body) {
+  function uploadEl(item, key, srcInput, label) {
     var id = "up" + (++uid);
     var out = h("small", { "aria-live": "polite" });
     var input = h("input", { type: "file", id: id, accept: "image/png,image/jpeg,image/webp,image/gif" });
@@ -278,14 +279,14 @@ td.num, th.num{text-align:right; font-variant-numeric:tabular-nums}
       var rd = new FileReader();
       rd.onload = function () {
         ghPut(name, rd.result.split(",")[1], "Upload " + name).then(function () {
-          item.src = name; changed();
-          var srcInput = body.querySelector("input[type=text]"); if (srcInput) srcInput.value = name;
+          item[key] = name; changed();
+          if (srcInput) srcInput.value = name;
           out.textContent = "Uploaded. It goes live with your next publish.";
         }).catch(function (e) { out.textContent = "Upload failed: " + e.message; });
       };
       rd.readAsDataURL(f);
     });
-    return h("label", { class: "field full", for: id }, [h("span", { text: "Upload screenshot" }), input, out]);
+    return h("label", { class: "field full", for: id }, [h("span", { text: label }), input, out]);
   }
 
   function renderContent() {
@@ -298,6 +299,16 @@ td.num, th.num{text-align:right; font-variant-numeric:tabular-nums}
         h("h2", { text: sec.title }), sec.hint ? h("p", { class: "hint", text: sec.hint }) : null, g
       ]));
     });
+  }
+
+  // Fill fields added in the redesign so they're editable (publish to save them)
+  function migrate(c) {
+    c.profile = c.profile || {};
+    if (!c.profile.roles) c.profile.roles = ["Principal Product Manager"];
+    if (!c.profile.tagline) c.profile.tagline = "I make marketplaces and checkout **measurably faster**.";
+    if (c.profile.about == null) c.profile.about = "";
+    if (!c.stats || (c.stats[0] && c.stats[0].value === "8+")) c.stats = [{ value: "45s → 2s", label: "Order response time" }, { value: "2–3 wks → 1", label: "Seller payout cycle" }, { value: "+60%", label: "Above target, installments month 1" }, { value: "50 → 95%", label: "MiniCash throughput" }];
+    return c;
   }
 
   // ================= GitHub =================
@@ -485,7 +496,7 @@ td.num, th.num{text-align:right; font-variant-numeric:tabular-nums}
     var tag = example ? h("span", { class: "example", text: "EXAMPLE DATA" }) : null;
     out.appendChild(h("div", { class: "kpis" }, [
       kpi("Page visits", d.total, "last " + d.daily.length + " days"),
-      kpi("Case study reads", caseReads, "read for 1.5s or more"),
+      kpi("Case study reads", caseReads, "opened to read"),
       kpi("Contact actions", contacted, "email or LinkedIn clicks"),
       kpi("CV downloads", cv, "")
     ]));
@@ -513,7 +524,7 @@ td.num, th.num{text-align:right; font-variant-numeric:tabular-nums}
 
     out.appendChild(h("div", { class: "two" }, [
       h("div", { class: "card" }, [h("h2", { text: "Visits per day" }), h("div", { html: svg })]),
-      h("div", { class: "card" }, [h("h2", { text: "Recruiter funnel" }), h("p", { class: "hint", text: "Approximate: case-study step uses the most-read case study." }), funnel])
+      h("div", { class: "card" }, [h("h2", { text: "Recruiter funnel" }), h("p", { class: "hint", text: "Approximate: case-study step uses the most-opened case study." }), funnel])
     ]));
 
     // case table
@@ -580,7 +591,7 @@ td.num, th.num{text-align:right; font-variant-numeric:tabular-nums}
       if (!ghReady()) { flash("gh-msg", "Connect GitHub first.", "warn"); return; }
       ghGet("content.json").then(function (f) {
         if (!f) throw new Error("content.json not found in the repo.");
-        state = JSON.parse(b64decode(f.content)); published = JSON.stringify(state); lsSet("portfolio-draft", state);
+        var raw = JSON.parse(b64decode(f.content)); published = JSON.stringify(raw); state = migrate(raw); lsSet("portfolio-draft", state);
         renderAll(); setDirty(); flash("gh-msg", "Loaded the latest content from GitHub.", "ok");
       }).catch(function (e) { flash("gh-msg", e.message, "bad"); });
     } }, ["Load latest from GitHub"]);
@@ -660,6 +671,7 @@ td.num, th.num{text-align:right; font-variant-numeric:tabular-nums}
     published = JSON.stringify(live);
     var draft = lsGet("portfolio-draft", null);
     state = draft || live;
+    migrate(state);
   }).catch(function () {
     state = lsGet("portfolio-draft", null) || { settings: {}, profile: {}, ledger: { rows: [] }, cases: [], principles: [], jobs: [], certifications: [], education: [], leadership: [] };
     published = "";
